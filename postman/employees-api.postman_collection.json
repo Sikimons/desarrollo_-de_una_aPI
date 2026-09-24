@@ -1,0 +1,443 @@
+{
+  "info": {
+    "_postman_id": "3c5dc113-e034-4ceb-b24b-c497e0b5bc2a",
+    "name": "Gestión de Empleados API",
+    "description": "Colección para validar el estado del backend y ejecutar el flujo CRUD completo de empleados. Ejecute las solicitudes en el orden definido o utilice el Collection Runner.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Estado del servicio",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        },
+        "description": "Comprueba que el backend esté disponible."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200 OK', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('El servicio reporta estado ok con el wrapper universal', function () {",
+              "  const response = pm.response.json();",
+              "  pm.expect(response.success).to.be.true;",
+              "  pm.expect(response.data).to.deep.equal({ status: 'ok' });",
+              "  pm.expect(response.errors).to.be.null;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flujo CRUD de empleados",
+      "item": [
+        {
+          "name": "1. Listar empleados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empleados"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('La respuesta usa el wrapper y contiene una lista', function () {",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.success).to.be.true;",
+                  "  pm.expect(response.data).to.be.an('array');",
+                  "  pm.expect(response.errors).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Crear empleado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Andrés Mendoza\",\n  \"cargo\": \"Arquitecto de Software\",\n  \"departamento\": \"Innovación\",\n  \"sueldo\": 4500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empleados"
+              ]
+            },
+            "description": "Crea un empleado y guarda el id retornado en la variable de colección employeeId."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 201 Created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "const employee = response.data;",
+                  "pm.test('Retorna el empleado creado con id', function () {",
+                  "  pm.expect(response.success).to.be.true;",
+                  "  pm.expect(employee).to.have.property('id').that.is.a('string').and.is.not.empty;",
+                  "  pm.expect(employee.nombre).to.equal('Andrés Mendoza');",
+                  "});",
+                  "",
+                  "if (employee.id) {",
+                  "  pm.collectionVariables.set('employeeId', employee.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Actualizar empleado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cargo\": \"Arquitecto Senior\",\n  \"sueldo\": 5000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empleados/{{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empleados",
+                "{{employeeId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Retorna los datos actualizados', function () {",
+                  "  const response = pm.response.json();",
+                  "  const employee = response.data;",
+                  "  pm.expect(response.success).to.be.true;",
+                  "  pm.expect(employee.id).to.equal(pm.collectionVariables.get('employeeId'));",
+                  "  pm.expect(employee.cargo).to.equal('Arquitecto Senior');",
+                  "  pm.expect(employee.sueldo).to.equal(5000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Eliminar empleado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empleados/{{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empleados",
+                "{{employeeId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200 OK con el wrapper universal', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.success).to.be.true;",
+                  "  pm.expect(response.data.id).to.equal(pm.collectionVariables.get('employeeId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Verificar eliminación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empleados"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const employeeId = pm.collectionVariables.get('employeeId');",
+                  "const response = pm.response.json();",
+                  "const employees = response.data;",
+                  "",
+                  "pm.test('Responde 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('El empleado eliminado ya no aparece', function () {",
+                  "  pm.expect(employees).to.be.an('array');",
+                  "  pm.expect(employees.some(employee => employee.id === employeeId)).to.be.false;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.unset('employeeId');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Validación perimetral y errores",
+      "item": [
+        {
+          "name": "Rechazar empleado inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"An\",\n  \"cargo\": \"Developer\",\n  \"departamento\": \"TI\",\n  \"sueldo\": -200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empleados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empleados"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400 Bad Request', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Informa los campos inválidos con el wrapper universal', function () {",
+                  "  const response = pm.response.json();",
+                  "  const fields = response.errors.map(error => error.field);",
+                  "  pm.expect(response.success).to.be.false;",
+                  "  pm.expect(response.data).to.be.null;",
+                  "  pm.expect(fields).to.include('body.nombre');",
+                  "  pm.expect(fields).to.include('body.sueldo');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechazar id inválido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cargo\": \"Developer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/empleados/id-invalido",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "empleados",
+                "id-invalido"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400 antes de acceder a MongoDB', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.success).to.be.false;",
+                  "  pm.expect(response.errors[0].field).to.equal('params.id');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Interceptar ruta inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ruta-inexistente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ruta-inexistente"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404 con el wrapper universal', function () {",
+                  "  pm.response.to.have.status(404);",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response.success).to.be.false;",
+                  "  pm.expect(response.data).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
