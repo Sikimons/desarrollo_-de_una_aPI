@@ -1,0 +1,45 @@
+<section class="panel" aria-labelledby="form-title">
+  <h2 id="form-title">{{ employee ? 'Editar empleado' : 'Nuevo empleado' }}</h2>
+  <p class="hint">Todos los campos son obligatorios.</p>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <fieldset [disabled]="busy">
+      <legend class="sr-only">Datos del empleado</legend>
+      <label for="nombre">Nombre completo</label>
+      <input id="nombre" formControlName="nombre" autocomplete="name" required maxlength="100"
+        [attr.aria-invalid]="form.controls.nombre.touched && form.controls.nombre.invalid"
+        aria-describedby="nombre-error">
+      <span id="nombre-error" class="field-error">
+        @if (form.controls.nombre.touched && form.controls.nombre.invalid) { Ingresa entre 3 y 100 caracteres. }
+      </span>
+
+      <label for="cargo">Cargo</label>
+      <input id="cargo" formControlName="cargo" autocomplete="organization-title" required maxlength="100"
+        [attr.aria-invalid]="form.controls.cargo.touched && form.controls.cargo.invalid"
+        aria-describedby="cargo-error">
+      <span id="cargo-error" class="field-error">
+        @if (form.controls.cargo.touched && form.controls.cargo.invalid) { Ingresa entre 2 y 100 caracteres. }
+      </span>
+
+      <label for="departamento">Departamento</label>
+      <input id="departamento" formControlName="departamento" required maxlength="100"
+        [attr.aria-invalid]="form.controls.departamento.touched && form.controls.departamento.invalid"
+        aria-describedby="departamento-error">
+      <span id="departamento-error" class="field-error">
+        @if (form.controls.departamento.touched && form.controls.departamento.invalid) { Ingresa entre 2 y 100 caracteres. }
+      </span>
+
+      <label for="sueldo">Sueldo mensual (USD)</label>
+      <input id="sueldo" type="number" formControlName="sueldo" step="any" required
+        [attr.aria-invalid]="form.controls.sueldo.touched && form.controls.sueldo.invalid"
+        aria-describedby="sueldo-error">
+      <span id="sueldo-error" class="field-error">
+        @if (form.controls.sueldo.touched && form.controls.sueldo.invalid) { Ingresa un sueldo mayor que cero. }
+      </span>
+
+      <div class="actions">
+        <button type="submit" class="primary">{{ employee ? 'Guardar cambios' : 'Crear empleado' }}</button>
+        <button type="button" (click)="cancelled.emit()">{{ employee ? 'Cancelar' : 'Limpiar' }}</button>
+      </div>
+    </fieldset>
+  </form>
+</section>

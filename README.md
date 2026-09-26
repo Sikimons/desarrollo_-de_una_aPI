@@ -68,15 +68,48 @@ docker compose down
    ```bash
    cd frontend
    ```
-2. Instala los paquetes locales y los bundles de estilos visuales (**Bootswatch**):
+2. Instala las dependencias del frontend (Angular 21, Node.js 24):
    ```bash
    npm install
    ```
 3. Levanta el servidor local de desarrollo de Angular:
    ```bash
-   ng serve -o
+   npm start
    ```
-   *La aplicación web se desplegará de forma automática en tu navegador en `http://localhost:4200`.*
+   *La aplicación web estará disponible en `http://localhost:4200`.*
+
+El servidor de desarrollo redirige `/api/**` a `http://localhost:3000` mediante
+`frontend/proxy.conf.json`. Mantén el backend encendido; si cambias su puerto,
+actualiza ese archivo. En producción, el servidor que publique los archivos de
+`frontend/dist/employees/browser` debe redirigir `/api/**` al backend.
+
+### Implementación del Reto 4
+
+La carpeta `frontend` incorpora la interfaz Angular, ausente en el código base de
+este repositorio. La vista se compone de tres componentes independientes:
+
+| Componente | Responsabilidad | Comunicación |
+| --- | --- | --- |
+| `EmployeesPageComponent` (Smart) | Coordina carga, selección, guardado, eliminación y errores. Consume `vm$` una sola vez con `async`. | Consume `EmployeeService` y atiende los eventos de los hijos. |
+| `EmployeeFormComponent` (Dumb) | Renderiza y valida el formulario sobre una copia de los datos. | `@Input`: `employee`, `resetVersion`, `busy`. `@Output`: `saved`, `cancelled`. |
+| `EmployeeTableComponent` (Dumb) | Renderiza la tabla y sus acciones. | `@Input`: `employees`, `busy`. `@Output`: `edited`, `removed`, `refreshed`. |
+
+Los componentes presentacionales usan `OnPush`, no conocen el servicio ni realizan
+peticiones HTTP. Editar o cancelar no modifica las filas. El formulario se limpia
+tras guardar correctamente; ante un error mantiene el borrador para reintentar.
+`EmployeeService` concentra el CRUD, desenvuelve `ApiResponse.data` y expone un
+`Observable` de solo lectura respaldado por un `BehaviorSubject` privado. Las
+operaciones crean nuevas referencias con spread, `map` y `filter`.
+
+No hay suscripciones manuales en los componentes: el `async` pipe gestiona el
+ciclo de vida y `exhaustMap` evita operaciones simultáneas. Se emplean los
+[decoradores de entrada soportados por Angular](https://angular.dev/guide/components/inputs)
+y la [integración de HTTP con async](https://angular.dev/guide/http/making-requests).
+
+Desde `frontend`, ejecuta `npm test` para comprobar la integración de formulario,
+tabla y API simulada (incluidos cancelación, errores, reintentos e inmutabilidad),
+y `npm run build` para compilar la aplicación con validación estricta de plantillas.
+En PowerShell, usa `npm.cmd` si la política de ejecución bloquea `npm.ps1`.
 
 ---
 

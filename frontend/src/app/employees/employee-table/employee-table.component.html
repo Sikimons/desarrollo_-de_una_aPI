@@ -1,0 +1,38 @@
+<section class="panel" aria-labelledby="table-title" [attr.aria-busy]="busy">
+  <div class="section-header">
+    <div>
+      <h2 id="table-title">Equipo <span class="count">{{ employees.length }}</span></h2>
+      <p class="hint">Información de empleados registrados.</p>
+    </div>
+    <button type="button" [disabled]="busy" (click)="refreshed.emit()">Actualizar</button>
+  </div>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Tabla de empleados">
+    <table>
+      <caption class="sr-only">Empleados y acciones de edición</caption>
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th><th scope="col">Cargo</th><th scope="col">Departamento</th>
+          <th scope="col" class="numeric">Sueldo</th><th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (employee of employees; track employee.id) {
+          <tr>
+            <th scope="row">{{ employee.nombre }}</th>
+            <td>{{ employee.cargo }}</td>
+            <td>{{ employee.departamento }}</td>
+            <td class="numeric">{{ employee.sueldo | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td><div class="actions">
+              <button type="button" [disabled]="busy" (click)="edited.emit(employee)"
+                [attr.aria-label]="'Editar a ' + employee.nombre">Editar</button>
+              <button type="button" class="danger" [disabled]="busy" (click)="removed.emit(employee)"
+                [attr.aria-label]="'Eliminar a ' + employee.nombre">Eliminar</button>
+            </div></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="empty">{{ busy ? 'Cargando empleados…' : 'No hay empleados registrados.' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

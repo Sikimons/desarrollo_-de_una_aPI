@@ -47,6 +47,7 @@ export const createEmployeeRequestSchema = z.object({
 export const updateEmployeeRequestSchema = z.object({
   body: updateEmployeeSchema,
   params: employeeParamsSchema,
+  
 });
 
 export const employeeParamsRequestSchema = z.object({

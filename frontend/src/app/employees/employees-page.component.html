@@ -1,0 +1,32 @@
+<main class="page">
+  <header class="page-header">
+    <p class="eyebrow">Administración</p>
+    <h1>Gestión de personal</h1>
+    <p>Registra y mantén actualizada la información de tu equipo.</p>
+  </header>
+
+  @if (vm$ | async; as vm) {
+    @if (vm.operation.error) {
+      <p class="alert error" role="alert">{{ vm.operation.error }}</p>
+    }
+    <p class="status" role="status">
+      {{ vm.operation.busy ? 'Procesando…' : vm.operation.message }}
+    </p>
+    <div class="workspace">
+      <app-employee-form
+        [employee]="selected()"
+        [resetVersion]="formVersion()"
+        [busy]="vm.operation.busy"
+        (saved)="save($event)"
+        (cancelled)="cancel()"
+      />
+      <app-employee-table
+        [employees]="vm.employees"
+        [busy]="vm.operation.busy"
+        (edited)="edit($event)"
+        (removed)="remove($event)"
+        (refreshed)="reload()"
+      />
+    </div>
+  }
+</main>
